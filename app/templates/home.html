@@ -1,40 +1,97 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <title>Images in a Row</title>
-    <style>
-        .image-grid {
-            display: grid;
-            grid-template-columns: repeat(6, 1fr);
-            gap: 10px;
-        }
-        .image-grid .image-cell {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            border-bottom: 1px solid #000;
-        }
-        .image-grid .image-cell:nth-child(6n+1) img {
-            border: 3px solid red;
-        }
-        .image-grid img {
-            width: 100%;
-            height: auto;
-        }
-        .image-label {
-            margin-top: 5px;
-            font-weight: bold;
-            font-size: larger;
-        }
-        .page-title {
-            text-align: center;
-            padding: 20px;
-        }
-    </style>
-</head>
+    <head>
+        <title>Images in a Row</title>
+        <style>
+            .image-grid {
+                display: grid;
+                grid-template-columns: repeat(6, 1fr);
+                gap: 10px;
+            }
+            .image-grid .image-cell {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+                border-bottom: 1px solid #000;
+                cursor: pointer;  /* Change cursor */
+                transition: transform 0.2s;  /* Smooth transform */
+            }
+            .image-grid .image-cell:hover {
+                transform: scale(1.05);  /* Zoom in slightly */
+            }
+            .image-grid .image-cell:nth-child(6n+1) img {
+                border: 3px solid red;
+            }
+            .image-grid img {
+                width: 100%;
+                height: auto;
+            }
+            .image-label {
+                margin-top: 5px;
+                font-weight: bold;
+                font-size: larger;
+            }
+            .page-title {
+                text-align: center;
+                padding: 20px;
+            }
+            .instructions {
+                text-align: center;
+                font-size: larger;
+                color: #333;
+            }
+
+            /* Adjusted styles for sticky button */
+            .sticky-btn {
+                position: fixed;
+                bottom: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                padding: 20px 40px;  /* Increase padding to make button larger */
+                background-color: #008CBA; /* Blue background */
+                color: white; /* White text */
+                font-size: 24px; /* Increase font size */
+                border: none; /* Remove border */
+                cursor: pointer; /* Hand cursor on hover */
+                border-radius: 20px; /* Rounded corners */
+            }
+            .sticky-btn:hover {
+                background-color: #007B9A; /* Darker blue on hover */
+            }
+        </style>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script>
+            $(document).ready(function(){
+                $(".image-cell").click(function(){
+                    var label = $(this).find(".image-label");
+                    if (label.text() === "Non Plankton") {
+                        label.text("Plankton");
+                    } else {
+                        label.text("Non Plankton");
+                    }
+                });
+
+                // Added code to send labels when sticky button is clicked
+                $(".sticky-btn").click(function(){
+                    var labels = [];
+                    $(".image-label").each(function(){
+                        labels.push($(this).text());
+                    });
+                    $.ajax({
+                        url: '/update_labels',
+                        type: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify({labels: labels}),
+                        dataType: 'json'
+                    });
+                });
+            });
+        </script>
+    </head>
 <body>
     <h1 class="page-title">Detritus and Plankton images</h1>
+    <p class="instructions">Images from SIPI Dataset with Ground Truth labels. Click in them to switch the labels between "Plankton" and "Non Plankton"</p>
     <div class="image-grid">
         {% for image in images %}
             <div class="image-cell">
@@ -43,5 +100,7 @@
             </div>
         {% endfor %}
     </div>
+    <!-- Added sticky button -->
+    <button class="sticky-btn">Send labels</button>
 </body>
 </html>

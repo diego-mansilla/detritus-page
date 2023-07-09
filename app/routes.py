@@ -1,5 +1,5 @@
 import os
-from flask import render_template
+from flask import render_template, request
 from app import app
 
 DEST_DIR = 'static/images'
@@ -10,7 +10,9 @@ def get_file_name(subdir):
 def get_class_name(path):
     parent_dir_path = os.path.dirname(path)
     parent_dir_name = os.path.basename(parent_dir_path)
-    return parent_dir_name
+    if parent_dir_name == "Detritus":
+        return "Non Plankton"
+    return "Plankton"
 
 def read_file(filename):
     result = []
@@ -22,7 +24,7 @@ def read_file(filename):
             if i == 1:
                 continue
             result.append(get_file_name(line.strip()))
-            labels.append(get_class_name(line.strip()))
+            labels.append(get_class_name(line.strip())) 
     return result, labels
 
 @app.route('/')
@@ -31,3 +33,9 @@ def home():
     images = ['images/' + img for img in images_input]
     print(images)
     return render_template('home.html', images=images, labels=labels)
+
+@app.route('/update_labels', methods=['POST'])
+def update_labels():
+    labels = request.json.get('labels')
+    print(labels)
+    return '', 204
