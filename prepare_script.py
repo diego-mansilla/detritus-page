@@ -18,7 +18,10 @@ def read_file(filename):
 DATASET_DIR = '../../DatasetSIPI'
 DEST_DIR = 'app/static/images'
 
-detfiles = read_file('input.txt')
+detfiles = read_file('mobilenet.txt') + read_file('inceptionresnet.txt') + read_file('simple.txt') + read_file('densenet.txt')
+print(len(detfiles))
+detfiles = set(detfiles)
+print(len(detfiles))
 for subdir, dirs, files in os.walk(DATASET_DIR):
     for file in files:
         if(file.endswith('.png')):

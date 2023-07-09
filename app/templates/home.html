@@ -78,11 +78,12 @@
                     $(".image-label").each(function(){
                         labels.push($(this).text());
                     });
+                    var currentPath = window.location.pathname;
                     $.ajax({
                         url: '/update_labels',
                         type: 'POST',
                         contentType: 'application/json',
-                        data: JSON.stringify({labels: labels}),
+                        data: JSON.stringify({labels: labels, url: currentPath}),
                         dataType: 'json'
                     });
                 });
