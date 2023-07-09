@@ -28,14 +28,18 @@ def read_file(filename):
     return result, labels
 
 @app.route('/')
-def home():
-    images_input , labels = read_file('input.txt')
+def main():
+    return render_template('main.html')
+
+@app.route('/<path:model>')
+def home(model):
+    images_input , labels = read_file(model + '.txt')
     images = ['images/' + img for img in images_input]
-    print(images)
     return render_template('home.html', images=images, labels=labels)
 
 @app.route('/update_labels', methods=['POST'])
 def update_labels():
     labels = request.json.get('labels')
-    print(labels)
+    url = request.json.get('url')
+    print(url)
     return '', 204
