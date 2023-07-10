@@ -35,7 +35,7 @@ def main():
 def home(model):
     images_input , labels = read_file(model + '.txt')
     images = ['images/' + img for img in images_input]
-    return render_template('home.html', images=images, labels=labels)
+    return render_template('home.html', images=images, labels=labels, model=model)
 
 @app.route('/update_labels', methods=['POST'])
 def update_labels():

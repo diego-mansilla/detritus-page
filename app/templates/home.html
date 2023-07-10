@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Images in a Row</title>
+    <title>Detritus and Plankton images</title>
     <style>
         .image-grid {
             display: grid;
@@ -129,8 +129,9 @@
     </script>
 </head>
 <body>
-    <h1 class="page-title">Detritus and Plankton images</h1>
+    <h1 class="page-title">Detritus and Plankton images {{model}}</h1>
     <p class="instructions">Images from SIPI Dataset with Ground Truth labels. Click on them to switch the labels between "Plankton" and "Non Plankton"</p>    
+    <p class="instructions">The images with a red frame are misclassified for model {{model}}. The 5 images on the right are the closest neighbors in the T-SNE map.</p>    
     <div class="info"></div>
     <div class="image-grid">
         {% for image in images %}
