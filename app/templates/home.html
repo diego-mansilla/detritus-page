@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Detritus and Plankton images</title>
+    <title>Images in a Row</title>
     <style>
         .image-grid {
             display: grid;
@@ -64,7 +64,7 @@
             border: none;
             cursor: pointer;
             border-radius: 20px;
-            margin-right: 10px; /* Added margin between buttons */
+            margin-right: 10px;
         }
         .sticky-btn:hover {
             background-color: #007B9A;
@@ -110,18 +110,20 @@
             });
 
             $(".sticky-btn").click(function(){
-                var labels = [];
-                $(".image-label").each(function(){
-                    labels.push($(this).text());
-                });
-                var currentPath = window.location.pathname;
-                $.ajax({
-                    url: '/update_labels',
-                    type: 'POST',
-                    contentType: 'application/json',
-                    data: JSON.stringify({labels: labels, url: currentPath}),
-                    dataType: 'json'
-                });
+                var action = $(this).data("action");
+                    var labels = [];
+                    $(".image-label").each(function(){
+                        labels.push($(this).text());
+                    });
+                    var currentPath = window.location.pathname;
+                    $.ajax({
+                        url: '/update_labels',
+                        type: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify({labels: labels, url: currentPath}),
+                        dataType: 'json'
+                    });
+                
             });
 
             updateCounts();
@@ -129,10 +131,8 @@
     </script>
 </head>
 <body>
-    <h1 class="page-title">Detritus and Plankton images {{model}}</h1>
-    <p class="instructions">Images from SIPI Dataset with Ground Truth labels. Click on them to switch the labels between "Plankton" and "Non Plankton"</p>    
-    <p class="instructions">The images with a red frame are misclassified for model {{model}}. The 5 images on the right are the closest neighbors in the T-SNE map.</p>    
-    <div class="info"></div>
+    <h1 class="page-title">Detritus and Plankton images</h1>
+    <p class="instructions">Images from SIPI Dataset with Ground Truth labels. Click on them to switch the labels between "Plankton" and "Non Plankton"</p>
     <div class="image-grid">
         {% for image in images %}
             <div class="image-cell">
@@ -141,9 +141,10 @@
             </div>
         {% endfor %}
     </div>
+    <div class="info"></div>
     <div class="sticky-btns">
-        <button class="sticky-btn" onclick="location.href='/'">Return to Main Page</button>
-        <button class="sticky-btn">Send labels</button>
+        <button class="sticky-btn" data-action="Return to Main Page" onclick="(location.href='/')">Return to Main Page</button>
+        <button class="sticky-btn" data-action="Send labels" onclick="confirm('Are you sure you want to send the labels?')">Send labels</button>
     </div>
 </body>
 </html>
