@@ -3,6 +3,7 @@ from flask import render_template, request
 from app import app
 
 DEST_DIR = 'static/images'
+IMG_SIZE = (160, 160)
 
 def get_file_name(subdir):
     return subdir[subdir.rfind('/')+1:]
@@ -31,10 +32,13 @@ def read_file(filename):
 def main():
     return render_template('main.html')
 
-@app.route('/<path:model>')
-def home(model):
+@app.route('/<path:model>/<path:mode>')
+def home(model, mode):
+    data_source = 'images/'
+    if mode == "1":
+        data_source = 'images_resized/'
     images_input , labels = read_file(model + '.txt')
-    images = ['images/' + img for img in images_input]
+    images = [data_source + img for img in images_input]
     return render_template('home.html', images=images, labels=labels, model=model)
 
 @app.route('/update_labels', methods=['POST'])
