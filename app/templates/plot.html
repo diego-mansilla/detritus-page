@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <title>Result</title>
+
+  <style>
+    .image-grid {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 10px;
+    }
+    .image-grid .image-cell {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        border-bottom: 1px solid #000;
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+    .image-grid .image-cell:hover {
+        transform: scale(1.05);
+    }
+    .image-grid .image-cell:nth-child(6n+1) img {
+        border: 3px solid red;
+    }
+    .image-grid img {
+        width: 100%;
+        height: auto;
+    }
+    .image-label {
+        margin-top: 5px;
+        font-weight: bold;
+        font-size: larger;
+    }
+    .page-title {
+        text-align: center;
+        padding: 20px;
+    }
+    .instructions {
+        text-align: center;
+        font-size: larger;
+        color: #333;
+    }
+    .info {
+        text-align: center;
+        font-size: larger;
+        color: #555;
+        margin-top: 10px;
+    }
+    .sticky-btns {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+    }
+    .sticky-btn {
+        padding: 20px 40px;
+        background-color: #008CBA;
+        color: white;
+        font-size: 24px;
+        border: none;
+        cursor: pointer;
+        border-radius: 20px;
+        margin-right: 10px;
+    }
+    .sticky-btn:hover {
+        background-color: #007B9A;
+    }
+  </style>
+  <!-- Plotly.js -->
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+
+<body>
+  <h1>Result for models in {{mode}} dataset</h1>
+
+  <!-- The graphs will be inserted inside these divs -->
+  {% for graph in graphs %}
+    <h2>Result for {{models[loop.index - 1]}} model</h2>
+    {{ graph | safe }}
+  {% endfor %}
+  <div class="sticky-btns">
+    <button class="sticky-btn" data-action="Return to Main Page" onclick="(location.href='/')">Return to Main Page</button>
+  </div>
+</body>
+</html>
