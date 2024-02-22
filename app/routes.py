@@ -1,5 +1,5 @@
 import os
-from flask import render_template, request
+from flask import render_template, request, jsonify
 import plotly.graph_objs as go
 import pandas as pd
 import plotly.express as px
@@ -818,6 +818,8 @@ def get_tsne_points(df, model, K, color):
     
     return df0, df1, df2, df3_1, df3_2, df4_1, df4_2
 
+image_coord_dict = {}
+
 @app.route('/plot_densenet/<path:mode>')
 def tsnemap_densenet(mode):
     df = pd.read_excel('detritus2.xlsx', sheet_name=int(mode))
@@ -843,6 +845,10 @@ def tsnemap_densenet(mode):
             color_prediction.append(label)
         else:
             color_prediction.append(inverse[label])
+
+        coord_tuple = (df['densenet_x'][i + 1], df['densenet_y'][i + 1])
+        if coord_tuple not in image_coord_dict:
+            image_coord_dict[coord_tuple] = get_file_name(df['File'][i + 1])
 
     graphs = []
     models = ['Densenet']
@@ -900,3 +906,22 @@ def tsnemap_densenet(mode):
     
 
     return render_template('plot.html', graphs=graphs, models=models, mode=mode_map[int(mode)])
+
+@app.route('/get_image', methods=['POST'])
+def get_image():
+    data = request.json
+    x = data['x']
+    y = data['y']
+    # Logic to determine image path based on x, y coordinates
+    # Example path, adjust according to your logic
+    image_name = image_coord_dict.get((x,y), "not_exist")
+    image_path = 'static/images_resized/' + image_name  # Adjust this path as necessary
+
+    print(x, y)
+    print(image_path)
+
+    # Check if the file exists
+    if os.path.isfile('app/'+image_path):
+        return jsonify({"imagePath": '/' + image_path, "exists": True})
+    else:
+        return jsonify({"message": "Image not available", "exists": False})
