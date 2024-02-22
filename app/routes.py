@@ -901,6 +901,14 @@ def tsnemap_densenet(mode):
 
     add_reviewed_to_fig(df, fig)
 
+    # Set the layout to be responsive in width and adjust the height accordingly
+    fig.update_layout(
+        autosize=True,
+        width=None,  # Width will be automatically adjusted
+        height=800,  # Height will be automatically adjusted
+        margin=dict(l=20, r=20, t=20, b=20),  # Adjust margins to your needs
+    )
+
     div = plotly.offline.plot(fig, output_type='div')
     graphs.append(div)
     
