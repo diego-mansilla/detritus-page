@@ -20,9 +20,6 @@
         .image-grid .image-cell:hover {
             transform: scale(1.05);
         }
-        .image-grid .image-cell:nth-child(6n+1) img {
-            border: 3px solid red;
-        }
         .image-grid img {
             width: 100%;
             height: auto;
@@ -46,6 +43,12 @@
             font-size: larger;
             color: #555;
             margin-top: 10px;
+        }
+        .green-border {
+            border: 3px solid green;
+        }
+        .red-border {
+            border: 3px solid red;
         }
         .sticky-btns {
             position: fixed;
@@ -134,10 +137,10 @@
     <h1 class="page-title">Detritus and Plankton images  that were classified by expert as {{search}}</h1>
     <p class="instructions">Left images are the ones classified by expert as {{search}}, on the right, the K nearest neighbors.</p>
     <div class="info"></div>
-    <h2>Images now classified as {{search}}</h2>
+    <h2>Images now classified as {{ search }}</h2>
     <div class="image-grid">
         {% for image in undetermined %}
-            <div class="image-cell">
+            <div class="image-cell {% if loop.index % 6 == 1 %}{% if search == pred_label[loop.index - 1] %}green-border{% else %}red-border{% endif %}{% endif %}">
                 <img src="{{ url_for('static', filename=image) }}" alt="Image">
                 <div class="image-label">SIPI GT: {{ undetermined_label[loop.index - 1] }}</div>
                 <div class="image-label">Prediction: {{ pred_label[loop.index - 1] }}</div>

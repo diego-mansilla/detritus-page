@@ -87,6 +87,12 @@ def review(model, mode):
                 pred_label.append(labels[idx+4])
                 pred_label.append(labels[idx+5])
 
+    search = "Undetermined"
+    if mode == "1":
+        search = "Plankton"
+    if mode == "2":
+        search = "Non Plankton"
+
     return render_template('review.html', undetermined=undetermined, undetermined_label=undetermined_label, pred_label=pred_label, search=search, model=model)
 
 @app.route('/update_labels', methods=['POST'])
