@@ -48,6 +48,47 @@ def home(model, mode):
     images = [data_source + img for img in images_input]
     return render_template('home.html', images=images, labels=labels, model=model)
 
+@app.route('/review/<path:model>/<path:mode>')
+def review(model, mode):
+    data_source = 'images_resized/'
+    images_input , labels = read_file(model + '.txt')
+    undetermined = []
+    undetermined_label = []
+    pred_label = []
+    search = "Indefinido"
+    if mode == "1":
+        search = "Plancton"
+    if mode == "2":
+        search = "Detritos"
+
+    for idx, img in enumerate(images_input):
+        if img in reviewed_images_dict:
+            val = reviewed_images_dict[img]
+            if val == search:
+                print(img)
+                undetermined.append(data_source + images_input[idx])
+                undetermined.append(data_source + images_input[idx+1])
+                undetermined.append(data_source + images_input[idx+2])
+                undetermined.append(data_source + images_input[idx+3])
+                undetermined.append(data_source + images_input[idx+4])
+                undetermined.append(data_source + images_input[idx+5])
+                
+                undetermined_label.append(labels[idx])
+                undetermined_label.append(labels[idx+1])
+                undetermined_label.append(labels[idx+2])
+                undetermined_label.append(labels[idx+3])
+                undetermined_label.append(labels[idx+4])
+                undetermined_label.append(labels[idx+5])
+
+                pred_label.append(inverse[labels[idx]])
+                pred_label.append(labels[idx+1])
+                pred_label.append(labels[idx+2])
+                pred_label.append(labels[idx+3])
+                pred_label.append(labels[idx+4])
+                pred_label.append(labels[idx+5])
+
+    return render_template('review.html', undetermined=undetermined, undetermined_label=undetermined_label, pred_label=pred_label, search=search, model=model)
+
 @app.route('/update_labels', methods=['POST'])
 def update_labels():
     labels = request.json.get('labels')
@@ -94,7 +135,7 @@ mode_map = {
 }
 
 reviewed_color_map={
-    "Indefinido": '#000000',
+    "Indefinido": '#FFBF00',
     "Detritos": '#5a3880',
     "Plancton": '#6ffffb',
 }
@@ -115,6 +156,10 @@ inverse={
     "Detritus": 'Other',
 
     "Other": 'Detritus',
+
+    "Plankton": 'Non Plankton',
+
+    "Non Plankton": 'Plankton',
 }
 
 # Can be removed from px.scatter params if it is less clear'
