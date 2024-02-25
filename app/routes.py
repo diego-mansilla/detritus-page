@@ -152,6 +152,12 @@ reviewed_label_map={
     "Plancton": 'Plankton',
 }
 
+formal_name_map={
+    "Other": 'Plankton',
+    "Detritus": 'Non Plankton',
+    "": "",
+}
+
 prediction_color_discrete_map={
     "Detritus": '#ff5a1d',
 
@@ -899,7 +905,7 @@ def tsnemap_densenet(mode):
 
         coord_tuple = (df['densenet_x'][i + 1], df['densenet_y'][i + 1])
         if coord_tuple not in image_coord_dict:
-            image_coord_dict[coord_tuple] = get_file_name(df['File'][i + 1])
+            image_coord_dict[coord_tuple] = (get_file_name(df['File'][i + 1]), df['Ground Truth'][i + 1])
 
     graphs = []
     models = ['Densenet']
@@ -971,16 +977,19 @@ def get_image():
     data = request.json
     x = data['x']
     y = data['y']
-    # Logic to determine image path based on x, y coordinates
-    # Example path, adjust according to your logic
-    image_name = image_coord_dict.get((x,y), "not_exist")
-    image_path = 'static/images_resized/' + image_name  # Adjust this path as necessary
+    # Assuming image_coord_dict maps coordinates to a tuple of (image_name, label)
+    image_info = image_coord_dict.get((x, y), ("not_exist", "No label"))
 
-    print(x, y)
-    print(image_path)
+    image_name, image_label = image_info
+    image_path = 'static/images_resized/' + image_name  # Adjust this path as necessary
+    expert_label = ""
+    prediction = image_label
+    if image_name in reviewed_images_dict:
+        expert_label = reviewed_images_dict[image_name]
+        prediction = inverse[image_label]
 
     # Check if the file exists
     if os.path.isfile('app/'+image_path):
-        return jsonify({"imagePath": '/' + image_path, "exists": True})
+        return jsonify({"imagePath": '/' + image_path, "label": formal_name_map[image_label], "prediction": formal_name_map[prediction], "expert_label": expert_label,"exists": True})
     else:
         return jsonify({"message": "Image not available", "exists": False})

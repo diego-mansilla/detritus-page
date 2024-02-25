@@ -94,39 +94,42 @@
   </div>
   
 
-  <div class="sticky-btns">
-    <button class="sticky-btn" data-action="Return to Main Page" onclick="(location.href='/')">Return to Main Page</button>
-  </div>
 
   <script>
     document.addEventListener('DOMContentLoaded', (event) => {
-      document.querySelectorAll('.plotly-graph-div').forEach((graphDiv) => {
-        graphDiv.on('plotly_click', function(data) {
-          var pts = data.points[0];
-          var x = pts.x;
-          var y = pts.y;
-    
-          fetch('/get_image', {
-            method: 'POST',
-            credentials: 'include',
-            body: JSON.stringify({x: x, y: y}),
-            headers: new Headers({
-              'Content-Type': 'application/json'
-            })
-          })
-          .then(response => response.json())
-          .then(data => {
-            if(data.exists) {
-              // Image exists, display it
-              document.getElementById('imageDisplay').innerHTML = `<img src="${data.imagePath}" alt="Image" style="max-width: 100%; height: auto;">`;
-            } else {
-              // Image does not exist, display message
-              document.getElementById('imageDisplay').innerHTML = `<span>${data.message}</span>`;
-            }
-          })
-          .catch(error => console.error('Error:', error));
+        document.querySelectorAll('.plotly-graph-div').forEach((graphDiv) => {
+            graphDiv.on('plotly_click', function(data) {
+                var pts = data.points[0];
+                var x = pts.x;
+                var y = pts.y;
+
+                fetch('/get_image', {
+                    method: 'POST',
+                    credentials: 'include',
+                    body: JSON.stringify({x: x, y: y}),
+                    headers: new Headers({
+                        'Content-Type': 'application/json'
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    var imageDisplay = document.getElementById('imageDisplay');
+                    if(data.exists) {
+                        // Image exists, display it with the label
+                        imageDisplay.innerHTML = `
+                            <img src="${data.imagePath}" alt="Image" style="max-width: 100%; height: auto;">
+                            <div class="image-label">Ground Truth: ${data.label}</div>
+                            <div class="image-label">DenseNet Prediction: ${data.prediction}</div>
+                            <div class="image-label">Expert: ${data.expert_label}</div>
+                        `;
+                    } else {
+                        // Image does not exist, display message
+                        imageDisplay.innerHTML = `<span>${data.message}</span>`;
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            });
         });
-      });
     });
     </script>
     
