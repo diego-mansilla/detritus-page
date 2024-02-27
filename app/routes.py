@@ -746,6 +746,10 @@ def add_reviewed_to_fig(df, fig):
                     color=reviewed_color_map['Indefinido'],
                     size=8,
                     colorscale='Hot',
+                    line=dict(
+                        color='Black',
+                        width=2
+                    ),
                 ), name=reviewed_label_map['Indefinido']),
                 secondary_y=True,
             )
@@ -755,6 +759,10 @@ def add_reviewed_to_fig(df, fig):
                     color=reviewed_color_map['Detritos'],
                     size=8,
                     colorscale='Hot',
+                    line=dict(
+                        color='Black',
+                        width=2
+                    ),
                 ), name=reviewed_label_map['Detritos']),
                 secondary_y=True,
             )
@@ -764,6 +772,10 @@ def add_reviewed_to_fig(df, fig):
                     color=reviewed_color_map['Plancton'],
                     size=8,
                     colorscale='Hot',
+                    line=dict(
+                        color='Black',
+                        width=2
+                    ),
                 ), name=reviewed_label_map['Plancton']),
                 secondary_y=True,
             )
@@ -896,12 +908,14 @@ def tsnemap_densenet(mode):
     color=[df['Ground Truth'][i + 1] for i in range(len(df['Ground Truth']))]
 
     color_prediction=[]
+    dx_prediction = []
+    dy_prediction = []
 
     for i, label in enumerate(df['Ground Truth']):
-        if df['DenseNet'][i+1] == 'Y':
+        if df['DenseNet'][i+1] == 'N':
             color_prediction.append(label)
-        else:
-            color_prediction.append(inverse[label])
+            dx_prediction.append(df['densenet_x'][i + 1])
+            dy_prediction.append(df['densenet_y'][i + 1])
 
         coord_tuple = (df['densenet_x'][i + 1], df['densenet_y'][i + 1])
         if coord_tuple not in image_coord_dict:
@@ -926,11 +940,15 @@ def tsnemap_densenet(mode):
     )
 
     fig.add_trace(
-    go.Scatter(x=df['densenet_x'].to_numpy(), y=df['densenet_y'].to_numpy(), opacity=0.1, mode='markers', marker=dict(
-            color=[prediction_color_discrete_map[x] for x in color_prediction],
-            size=8,
+    go.Scatter(x=dx_prediction, y=dy_prediction, opacity=0.5, mode='markers', marker=dict(
+            color=[color_discrete_map[x] for x in color_prediction],
+            size=6,
             colorscale='Hot',
-        ), name="Prediction labels"),
+            line=dict(
+                color='Black',
+                width=1,
+            )
+        ), name="Ground Truth labels of Points that failed in prediction"),
         secondary_y=True,
     )
 
@@ -939,7 +957,11 @@ def tsnemap_densenet(mode):
             color=df4_1['color'],
             size=10,
             colorscale='Hot',
-        ), name="4/4 error on classification"),
+            line=dict(
+                color='Black',
+                width=1,
+            )
+        ), name="GT of points that failed classification in the 4 models"),
         secondary_y=True,
     )
 
@@ -952,7 +974,7 @@ def tsnemap_densenet(mode):
                     color='Black',
                     width=2
                 )
-            ), name="4/4 error on classification and K neighbors different"),
+            ), name="GT of points that failed classification in the 4 models and have K nearest neighbors of different GT"),
         secondary_y=True,
     )
 
