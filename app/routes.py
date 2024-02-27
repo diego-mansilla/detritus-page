@@ -147,9 +147,9 @@ reviewed_color_map={
 }
 
 reviewed_label_map={
-    "Indefinido": 'Undetermined',
-    "Detritos": 'Non-Plankton',
-    "Plancton": 'Plankton',
+    "Indefinido": 'Expert classified as Undetermined',
+    "Detritos": 'Expert classified as Non-Plankton',
+    "Plancton": 'Expert classified as Plankton',
 }
 
 formal_name_map={
