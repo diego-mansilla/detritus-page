@@ -428,7 +428,17 @@ def get_image():
             "prediction": densenet_file_prediction.prediction_label,
             "expert_label": densenet_file_prediction.expert_prediction,
             "knnImagePaths": knn_image_paths,
+            "failed_models": densenet_file_prediction.number_of_models_failed,
+            "name": image_name,
             "exists": True,
         })
     else:
-        return jsonify({"message": "Image not available", "exists": False})
+        return jsonify({
+            "message": "Image not available", 
+            "name": image_name,
+            "label": densenet_file_prediction.ground_truth_label,
+            "prediction": densenet_file_prediction.prediction_label,
+            "expert_label": densenet_file_prediction.expert_prediction,
+            "failed_models": densenet_file_prediction.number_of_models_failed,
+            "exists": False
+        })

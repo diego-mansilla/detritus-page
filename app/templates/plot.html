@@ -116,6 +116,7 @@
                         // Display the primary image with labels
                         var content = `
                             <img src="${data.imagePath}" alt="Image" style="max-width: 100%; height: auto;">
+                            <div class="image-label">Name of file: ${data.name}</div>
                             <div class="image-label">Ground Truth: ${data.label}</div>
                             <div class="image-label">DenseNet Prediction: ${data.prediction}</div>
                             <div class="image-label">Expert: ${data.expert_label}</div>
@@ -134,7 +135,15 @@
                         imageDisplay.innerHTML = content;
                     } else {
                         // Image does not exist, display message
-                        imageDisplay.innerHTML = `<span>${data.message}</span>`;
+                        var content = `
+                            <div class="image-label">${data.message}</div>
+                            <div class="image-label">Name of file: ${data.name}</div>
+                            <div class="image-label">Ground Truth: ${data.label}</div>
+                            <div class="image-label">DenseNet Prediction: ${data.prediction}</div>
+                            <div class="image-label">Number of models that failed prediction: ${data.failed_models}</div>
+                        `;
+                        
+                        imageDisplay.innerHTML = content;
                     }
                 })
                 .catch(error => console.error('Error:', error));
