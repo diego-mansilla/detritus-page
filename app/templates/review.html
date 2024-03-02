@@ -76,7 +76,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script>
         $(document).ready(function(){
-            var totalImages = {{ undetermined|length }};
+            var totalImages = $(".image-cell").length;
             var planktonCount = 0;
             var nonPlanktonCount = 0;
 
@@ -92,24 +92,12 @@
 
             function updateCounts() {
                 $(".info").html(
-                    "Number of Images: " + totalImages +
-                    "<br>Number of Images with 'Plankton' labels: " + planktonCount +
-                    "<br>Number of Images with 'Non Plankton' labels: " + nonPlanktonCount
+                    "Number of Images: " + totalImages
                 );
             }
 
             $(".image-cell").click(function(){
-                var label = $(this).find(".image-label");
-                if (label.text() === "Non Plankton") {
-                    label.text("Plankton");
-                    nonPlanktonCount--;
-                    planktonCount++;
-                } else {
-                    label.text("Non Plankton");
-                    planktonCount--;
-                    nonPlanktonCount++;
-                }
-                updateCounts();
+            
             });
 
             $(".sticky-btn").click(function(){
@@ -134,11 +122,24 @@
     </script>
 </head>
 <body>
-    <h1 class="page-title">Detritus and Plankton images that Densenet classified as {{ search }} </h1>
+    <a id="top"></a> <!-- Anchor for "Back to Top" -->
+    <h1 class="page-title">Detritus and Plankton images that Densenet classified as {{ search }}</h1>
     <p class="instructions">Left images are the ones to be analyzed, on the right, the 5 nearest neighbors.</p>
+    
+    <!-- Navigation Links -->
+    <div class="navigation">
+        {% for classification in expert_classification %}
+            <a href="#{{ classification|replace(' ', '-')|lower }}">{{ classification }}</a>
+            {% if not loop.last %}|{% endif %}
+        {% endfor %}
+    </div>
+    
     <div class="info"></div>
-    {% for i in range(3) %}
-        <h1>Images now classified as {{ expert_classification[i] }}</h1>
+    
+    {% for i in range(expert_classification|length) %}
+        <!-- Section Title with Anchor ID for Navigation -->
+        <h2 id="{{ expert_classification[i]|replace(' ', '-')|lower }}">Images expert classified as {{ expert_classification[i] }}</h2>
+        
         <div class="image-grid">
             {% for item in prepared_data[i] %}
                 <div class="image-cell {% if loop.index % 6 == 1 %}{% if expert_classification[i] == item.prediction %}green-border{% else %}red-border{% endif %}{% endif %}">
@@ -146,14 +147,18 @@
                     <div class="image-label">SIPI GT: {{ item.label }}</div>
                     <div class="image-label">Prediction: {{ item.prediction }}</div>
                     {% if loop.index % 6 == 1 %}
-                        <div class="image-label">Expert: {{ expert_classification[i] }} </div>
+                        <div class="image-label">Expert: {{ expert_classification[i] }}</div>
                     {% endif %}
                 </div>
             {% endfor %}
         </div>
+        
+        <!-- Back to Top Link for Each Section -->
+        <div><a href="#top" class="back-to-top">Back to Top</a></div>
     {% endfor %}
+    
     <div class="sticky-btns">
-        <button class="sticky-btn" data-action="Return to Main Page" onclick="(location.href='/')">Return to Main Page</button>
+        <button class="sticky-btn" data-action="Return to Main Page" onclick="location.href='/'">Return to Main Page</button>
         <button class="sticky-btn" data-action="Send labels" onclick="if(confirm('Are you sure you want to send the labels?')){ /* logic to send labels */ }">Send labels</button>
     </div>
 </body>
