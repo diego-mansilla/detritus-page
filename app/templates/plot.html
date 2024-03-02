@@ -93,8 +93,6 @@
     Click on a point to see the image.
   </div>
   
-
-
   <script>
     document.addEventListener('DOMContentLoaded', (event) => {
         document.querySelectorAll('.plotly-graph-div').forEach((graphDiv) => {
@@ -102,7 +100,7 @@
                 var pts = data.points[0];
                 var x = pts.x;
                 var y = pts.y;
-
+    
                 fetch('/get_image', {
                     method: 'POST',
                     credentials: 'include',
@@ -115,13 +113,25 @@
                 .then(data => {
                     var imageDisplay = document.getElementById('imageDisplay');
                     if(data.exists) {
-                        // Image exists, display it with the label
-                        imageDisplay.innerHTML = `
+                        // Display the primary image with labels
+                        var content = `
                             <img src="${data.imagePath}" alt="Image" style="max-width: 100%; height: auto;">
                             <div class="image-label">Ground Truth: ${data.label}</div>
                             <div class="image-label">DenseNet Prediction: ${data.prediction}</div>
                             <div class="image-label">Expert: ${data.expert_label}</div>
                         `;
+    
+                        // Check if there are kNN images and add a label if so
+                        if (data.knnImagePaths && data.knnImagePaths.length > 0) {
+                            content += `<div class="image-label">5 Nearest Neighbors:</div>`; // Label for kNN images
+                            
+                            // Add kNN images
+                            data.knnImagePaths.forEach((path, index) => {
+                                content += `<img src="${path}" alt="kNN Image ${index + 1}" style="max-width: 100%; height: auto; margin: 5px;">`;
+                            });
+                        }
+    
+                        imageDisplay.innerHTML = content;
                     } else {
                         // Image does not exist, display message
                         imageDisplay.innerHTML = `<span>${data.message}</span>`;
@@ -132,6 +142,7 @@
         });
     });
     </script>
+      
     
 </body>
 </html>

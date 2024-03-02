@@ -10,7 +10,7 @@ from plotly.subplots import make_subplots
 from app import app
 from app.config import reviewed_label_map, reviewed_color_map, mode_map, formal_name_map, inverse, color_discrete_map, reviewed_images_dict
 from app.utils import get_file_name, read_file
-from app.data import get_or_load_files_dict, DenseNetFilePrediction
+from app.data import get_or_load_files_dict
 
 DEST_DIR = 'static/images'
 IMG_SIZE = (160, 160)
@@ -406,24 +406,29 @@ def get_image():
     y = data['y']
     # Assuming image_coord_dict maps coordinates to a tuple of (image_name, label)
     image_info = image_coord_dict.get((x, y), ("not_exist", "No label"))
-    print((x, y))
-    print(image_info)
     
-
-    image_name, image_label = image_info
-    image_path = 'static/images_resized/' + image_name  # Adjust this path as necessary
     files_dict = get_or_load_files_dict()
-    if image_name in files_dict:
-        densenet_file_prediction = files_dict[image_name]
-        print(densenet_file_prediction.to_dict())
-    expert_label = ""
-    prediction = image_label
-    if image_name in reviewed_images_dict:
-        expert_label = reviewed_images_dict[image_name]
-        prediction = inverse[image_label]
+
+    image_name, _ = image_info
+    image_path = 'static/images_resized/' + image_name  # Adjust this path as necessary
+
+    densenet_file_prediction = files_dict[image_name]
+    
+    knn_image_paths = [
+        '/static/images_resized/' + knn_image_name for knn_image_name in densenet_file_prediction.kNNList
+    ]
+
+    print(densenet_file_prediction.to_dict())
 
     # Check if the file exists
     if os.path.isfile('app/'+image_path):
-        return jsonify({"imagePath": '/' + image_path, "label": formal_name_map[image_label], "prediction": formal_name_map[prediction], "expert_label": expert_label,"exists": True})
+        return jsonify({
+            "imagePath": '/' + image_path, 
+            "label": densenet_file_prediction.ground_truth_label,
+            "prediction": densenet_file_prediction.prediction_label,
+            "expert_label": densenet_file_prediction.expert_prediction,
+            "knnImagePaths": knn_image_paths,
+            "exists": True,
+        })
     else:
         return jsonify({"message": "Image not available", "exists": False})
