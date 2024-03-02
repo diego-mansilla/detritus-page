@@ -1,5 +1,5 @@
 import os
-from flask import render_template, request, jsonify
+from flask import render_template, request, jsonify, session
 import plotly.graph_objs as go
 import pandas as pd
 import plotly.express as px
@@ -9,27 +9,12 @@ import numpy as np
 from plotly.subplots import make_subplots
 from app import app
 from app.config import reviewed_label_map, reviewed_color_map, mode_map, formal_name_map, inverse, color_discrete_map, reviewed_images_dict
-from app.utils import get_class_name, get_file_name
-from app.data import get_files_dict
-
-TEST_SHEET_NUMBER = 0
-VAL_SHEET_NUMBER = 1
+from app.utils import get_file_name, read_file
+from app.data import get_or_load_files_dict, DenseNetFilePrediction
 
 DEST_DIR = 'static/images'
 IMG_SIZE = (160, 160)
-
-def read_file(filename):
-    result = []
-    labels = []
-    with open(filename, 'r') as file:
-        i = 0
-        for line in file:
-            i = i + 1
-            if i == 1:
-                continue
-            result.append(get_file_name(line.strip()))
-            labels.append(get_class_name(line.strip())) 
-    return result, labels
+DATASET_NAME = ["TESTING", "VALIDATION", "TRAINING"]
 
 @app.route('/')
 def main():
@@ -130,7 +115,7 @@ def tsnemap(mode):
 
     return render_template('plot.html', graphs=graphs, models=models, mode=mode_map[int(mode)])
 
-def add_reviewed_to_fig(df, fig, files_dict):
+def add_reviewed_to_fig(fig, files_dict, mode):
     indefinido = {}
     indefinido['x'] = []
     indefinido['y'] = []
@@ -147,6 +132,8 @@ def add_reviewed_to_fig(df, fig, files_dict):
         if key not in files_dict:
             continue
         file_pred = files_dict[key]
+        if file_pred.dataset != DATASET_NAME[mode]:
+            continue
         x, y = file_pred.densenet_position
         if value == "Indefinido":
             indefinido['x'].append(x)
@@ -324,7 +311,7 @@ def tsnemap_densenet(mode):
 
     color=[df['Ground Truth'][i + 1] for i in range(len(df['Ground Truth']))]
 
-    files_dict = get_files_dict(mode)
+    files_dict = get_or_load_files_dict()
 
     color_prediction=[]
     dx_prediction = []
@@ -397,7 +384,7 @@ def tsnemap_densenet(mode):
         secondary_y=True,
     )
 
-    add_reviewed_to_fig(df, fig, files_dict)
+    add_reviewed_to_fig(fig, files_dict, int(mode))
 
     # Set the layout to be responsive in width and adjust the height accordingly
     fig.update_layout(
@@ -410,7 +397,6 @@ def tsnemap_densenet(mode):
     div = plotly.offline.plot(fig, output_type='div')
     graphs.append(div)
     
-
     return render_template('plot.html', graphs=graphs, models=models, mode=mode_map[int(mode)])
 
 @app.route('/get_image', methods=['POST'])
@@ -420,9 +406,16 @@ def get_image():
     y = data['y']
     # Assuming image_coord_dict maps coordinates to a tuple of (image_name, label)
     image_info = image_coord_dict.get((x, y), ("not_exist", "No label"))
+    print((x, y))
+    print(image_info)
+    
 
     image_name, image_label = image_info
     image_path = 'static/images_resized/' + image_name  # Adjust this path as necessary
+    files_dict = get_or_load_files_dict()
+    if image_name in files_dict:
+        densenet_file_prediction = files_dict[image_name]
+        print(densenet_file_prediction.to_dict())
     expert_label = ""
     prediction = image_label
     if image_name in reviewed_images_dict:
