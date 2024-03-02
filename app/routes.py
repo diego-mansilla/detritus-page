@@ -9,19 +9,13 @@ import numpy as np
 from plotly.subplots import make_subplots
 from app import app
 from app.config import reviewed_label_map, reviewed_color_map, mode_map, formal_name_map, inverse, color_discrete_map, reviewed_images_dict
+from app.utils import get_class_name, get_file_name
+
+TEST_SHEET_NUMBER = 0
+VAL_SHEET_NUMBER = 1
 
 DEST_DIR = 'static/images'
 IMG_SIZE = (160, 160)
-
-def get_file_name(subdir):
-    return subdir[subdir.rfind('/')+1:]
-
-def get_class_name(path):
-    parent_dir_path = os.path.dirname(path)
-    parent_dir_name = os.path.basename(parent_dir_path)
-    if parent_dir_name == "Detritus":
-        return "Non Plankton"
-    return "Plankton"
 
 def read_file(filename):
     result = []
@@ -98,7 +92,7 @@ def review(model, mode):
 
 @app.route('/update_labels', methods=['POST'])
 def update_labels():
-    labels = request.json.get('labels')
+    _ = request.json.get('labels')
     url = request.json.get('url')
     print(url)
     return '', 204
@@ -329,8 +323,6 @@ def tsnemap_densenet(mode):
     #define list of columns range
     cols = [x for x in range(df.shape[1])]
 
-    #remove second column in DataFrame
-    cols.remove(8)
 
     df = df.iloc[:, cols]
 
@@ -341,7 +333,7 @@ def tsnemap_densenet(mode):
     dy_prediction = []
 
     for i, label in enumerate(df['Ground Truth']):
-        if df['DenseNet'][i+1] == 'N':
+        if df['DenseNet_Model_Pred'][i+1] == 'N':
             color_prediction.append(label)
             dx_prediction.append(df['densenet_x'][i + 1])
             dy_prediction.append(df['densenet_y'][i + 1])
