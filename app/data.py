@@ -10,7 +10,7 @@ class FilePrediction:
         self.number_of_models_failed = nmf
         self.prediction_label = pred_label
 
-def init_files(mode):
+def get_files_dict(mode):
     df = pd.read_excel('detritus2.xlsx', sheet_name=int(mode))
     new_header = df.iloc[0] #grab the first row for the header
     df = df[1:] #take the data less the header row
@@ -28,8 +28,8 @@ def init_files(mode):
             ground_truth_label=ground_truth, 
             dense_x=df['densenet_x'][i + 1], 
             dense_y=df['densenet_y'][i + 1],
-            nmf=df['Wrong classifications'][i + 1]
-            pred_label=inverse[ground_truth]
+            nmf=df['Wrong classifications'][i + 1],
+            pred_label=inverse[ground_truth],
         )
 
         pred_dict[name] = file_prediction

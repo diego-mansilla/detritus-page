@@ -10,6 +10,7 @@ from plotly.subplots import make_subplots
 from app import app
 from app.config import reviewed_label_map, reviewed_color_map, mode_map, formal_name_map, inverse, color_discrete_map, reviewed_images_dict
 from app.utils import get_class_name, get_file_name
+from app.data import get_files_dict
 
 TEST_SHEET_NUMBER = 0
 VAL_SHEET_NUMBER = 1
@@ -129,13 +130,7 @@ def tsnemap(mode):
 
     return render_template('plot.html', graphs=graphs, models=models, mode=mode_map[int(mode)])
 
-def find_coordinates(df, name):
-    for i, n in enumerate(df['File']):
-        if get_file_name(n) == name:
-            return df['densenet_x'][i+1], df['densenet_y'][i+1]
-    return None, None
-
-def add_reviewed_to_fig(df, fig):
+def add_reviewed_to_fig(df, fig, files_dict):
     indefinido = {}
     indefinido['x'] = []
     indefinido['y'] = []
@@ -149,9 +144,10 @@ def add_reviewed_to_fig(df, fig):
     plancton['y'] = []
 
     for key, value in reviewed_images_dict.items():
-        x, y = find_coordinates(df, key)
-        if x == None:
+        if key not in files_dict:
             continue
+        file_pred = files_dict[key]
+        x, y = file_pred.densenet_position
         if value == "Indefinido":
             indefinido['x'].append(x)
             indefinido['y'].append(y)
@@ -328,6 +324,8 @@ def tsnemap_densenet(mode):
 
     color=[df['Ground Truth'][i + 1] for i in range(len(df['Ground Truth']))]
 
+    files_dict = get_files_dict(mode)
+
     color_prediction=[]
     dx_prediction = []
     dy_prediction = []
@@ -399,7 +397,7 @@ def tsnemap_densenet(mode):
         secondary_y=True,
     )
 
-    add_reviewed_to_fig(df, fig)
+    add_reviewed_to_fig(df, fig, files_dict)
 
     # Set the layout to be responsive in width and adjust the height accordingly
     fig.update_layout(

@@ -132,7 +132,8 @@ color_discrete_map={
     "LClass_Cypris": '#C0F36E',
 }
 
-reviewed_images_dict = {'frame_401_2017-09-17_09_55_34.504_1148_68.png': 'Indefinido',
+reviewed_images_dict = {
+ 'frame_401_2017-09-17_09_55_34.504_1148_68.png': 'Indefinido',
  'frame_236_2017-09-17_12_02_24.860_1870_370.png': 'Indefinido',
  'frame_5_2017-09-16_01_09_39.011_1417_898.png': 'Indefinido',
  'frame_783_2017-09-16_00_06_14.278_1814_1617.png': 'Indefinido',
