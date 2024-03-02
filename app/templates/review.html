@@ -134,25 +134,28 @@
     </script>
 </head>
 <body>
-    <h1 class="page-title">Detritus and Plankton images  that were classified by expert as {{search}}</h1>
-    <p class="instructions">Left images are the ones classified by expert as {{search}}, on the right, the K nearest neighbors.</p>
+    <h1 class="page-title">Detritus and Plankton images that Densenet classified as {{ search }} </h1>
+    <p class="instructions">Left images are the ones to be analyzed, on the right, the 5 nearest neighbors.</p>
     <div class="info"></div>
-    <h2>Images now classified as {{ search }}</h2>
-    <div class="image-grid">
-        {% for image in undetermined %}
-            <div class="image-cell {% if loop.index % 6 == 1 %}{% if search == pred_label[loop.index - 1] %}green-border{% else %}red-border{% endif %}{% endif %}">
-                <img src="{{ url_for('static', filename=image) }}" alt="Image">
-                <div class="image-label">SIPI GT: {{ undetermined_label[loop.index - 1] }}</div>
-                <div class="image-label">Prediction: {{ pred_label[loop.index - 1] }}</div>
-                {% if loop.index % 6 == 1 %}
-                    <div class="image-label">Expert: {{ search }}</div>
-                {% endif %}
-            </div>
-        {% endfor %}
-    </div>
+    {% for i in range(3) %}
+        <h1>Images now classified as {{ expert_classification[i] }}</h1>
+        <div class="image-grid">
+            {% for item in prepared_data[i] %}
+                <div class="image-cell {% if loop.index % 6 == 1 %}{% if expert_classification[i] == item.prediction %}green-border{% else %}red-border{% endif %}{% endif %}">
+                    <img src="{{ url_for('static', filename=item.image) }}" alt="Image">
+                    <div class="image-label">SIPI GT: {{ item.label }}</div>
+                    <div class="image-label">Prediction: {{ item.prediction }}</div>
+                    {% if loop.index % 6 == 1 %}
+                        <div class="image-label">Expert: {{ expert_classification[i] }} </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    {% endfor %}
     <div class="sticky-btns">
         <button class="sticky-btn" data-action="Return to Main Page" onclick="(location.href='/')">Return to Main Page</button>
-        <button class="sticky-btn" data-action="Send labels" onclick="confirm('Are you sure you want to send the labels')">Send labels</button>
+        <button class="sticky-btn" data-action="Send labels" onclick="if(confirm('Are you sure you want to send the labels?')){ /* logic to send labels */ }">Send labels</button>
     </div>
 </body>
+
 </html>

@@ -32,49 +32,50 @@ def home(model, mode):
 @app.route('/review/<path:model>/<path:mode>')
 def review(model, mode):
     data_source = 'images_resized/'
-    images_input , labels = read_file(model + '.txt')
-    undetermined = []
-    undetermined_label = []
-    pred_label = []
-    search = "Indefinido"
+
+    files_dict = get_or_load_files_dict()
+    
+    images = [[], [], []]
+    ground_truth = [[], [], []]
+    pred_label = [[], [], []]
+
+    search = "Plankton"
     if mode == "1":
-        search = "Plancton"
-    if mode == "2":
-        search = "Detritos"
-
-    for idx, img in enumerate(images_input):
-        if img in reviewed_images_dict:
-            val = reviewed_images_dict[img]
-            if val == search:
-                print(img)
-                undetermined.append(data_source + images_input[idx])
-                undetermined.append(data_source + images_input[idx+1])
-                undetermined.append(data_source + images_input[idx+2])
-                undetermined.append(data_source + images_input[idx+3])
-                undetermined.append(data_source + images_input[idx+4])
-                undetermined.append(data_source + images_input[idx+5])
-                
-                undetermined_label.append(labels[idx])
-                undetermined_label.append(labels[idx+1])
-                undetermined_label.append(labels[idx+2])
-                undetermined_label.append(labels[idx+3])
-                undetermined_label.append(labels[idx+4])
-                undetermined_label.append(labels[idx+5])
-
-                pred_label.append(inverse[labels[idx]])
-                pred_label.append(labels[idx+1])
-                pred_label.append(labels[idx+2])
-                pred_label.append(labels[idx+3])
-                pred_label.append(labels[idx+4])
-                pred_label.append(labels[idx+5])
-
-    search = "Undetermined"
-    if mode == "1":
-        search = "Plankton"
-    if mode == "2":
         search = "Non Plankton"
 
-    return render_template('review.html', undetermined=undetermined, undetermined_label=undetermined_label, pred_label=pred_label, search=search, model=model)
+    for img, val in reviewed_images_dict.items():
+        densenet_prediction = files_dict[img]
+        arr_idx = 2
+        if val == "Detritos":
+            arr_idx = 1
+        if val == "Plancton":
+            arr_idx = 0
+
+        if densenet_prediction.prediction_label == search:
+            if len(densenet_prediction.kNNList) == 0:
+                # TRAINING case (no images)
+                print(densenet_prediction.to_dict()) 
+                continue
+            images[arr_idx].append(data_source + img)
+            ground_truth[arr_idx].append(densenet_prediction.ground_truth_label)
+            pred_label[arr_idx].append(densenet_prediction.prediction_label)
+            for k in densenet_prediction.kNNList:
+                k_pred = files_dict[k]
+                images[arr_idx].append(data_source + k)
+                ground_truth[arr_idx].append(k_pred.ground_truth_label)
+                pred_label[arr_idx].append(k_pred.prediction_label)
+
+    prepared_data = []
+    for category_data, labels, predictions in zip(images, ground_truth, pred_label):
+        prepared_category_data = [{
+            'image': image,
+            'label': label,
+            'prediction': prediction
+        } for image, label, prediction in zip(category_data, labels, predictions)]
+        prepared_data.append(prepared_category_data)
+
+    
+    return render_template('review.html', prepared_data=prepared_data, expert_classification=["Plankton", "Non Plankton", "Undetermined"], search=search)
 
 @app.route('/update_labels', methods=['POST'])
 def update_labels():

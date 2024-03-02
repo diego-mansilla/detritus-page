@@ -81,13 +81,17 @@ def get_files_dict(mode):
         name = get_file_name(file_name)
         ground_truth = get_class_name(file_name)
 
+        prediction = ground_truth
+        if df['DenseNet_Model_Pred'][i + 1] == "N":
+            prediction = inverse[prediction]
+
         file_prediction = DenseNetFilePrediction(
             name=name, 
             ground_truth_label=ground_truth, 
             dense_x=df['densenet_x'][i + 1], 
             dense_y=df['densenet_y'][i + 1],
             nmf=df['Wrong classifications'][i + 1],
-            pred_label=inverse[ground_truth],
+            pred_label=prediction,
             dataset=dataset,
             kNNList=None,
         )
