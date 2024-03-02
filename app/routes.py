@@ -122,12 +122,12 @@ def add_reviewed_to_fig(fig, files_dict, mode):
     indefinido['y'] = []
 
     detritos = {}
-    detritos['x'] = []
-    detritos['y'] = []
+    detritos['x'] = [[],[]]
+    detritos['y'] = [[],[]]
 
     plancton = {}
-    plancton['x'] = []
-    plancton['y'] = []
+    plancton['x'] = [[],[]]
+    plancton['y'] = [[],[]]
 
     for key, value in reviewed_images_dict.items():
         if key not in files_dict:
@@ -136,17 +136,30 @@ def add_reviewed_to_fig(fig, files_dict, mode):
         if file_pred.dataset != DATASET_NAME[mode]:
             continue
         x, y = file_pred.densenet_position
-        if value == "Indefinido":
-            indefinido['x'].append(x)
-            indefinido['y'].append(y)
+        
+        if file_pred.prediction_label == formal_name_map[value]:
+            if value == "Detritos":
+                detritos['x'][0].append(x)
+                detritos['y'][0].append(y)
 
-        if value == "Detritos":
-            detritos['x'].append(x)
-            detritos['y'].append(y)
+            if value == "Plancton":
+                plancton['x'][0].append(x)
+                plancton['y'][0].append(y)
 
-        if value == "Plancton":
-            plancton['x'].append(x)
-            plancton['y'].append(y)
+        else:
+            if value == "Detritos":
+                detritos['x'][1].append(x)
+                detritos['y'][1].append(y)
+
+            if value == "Plancton":
+                plancton['x'][1].append(x)
+                plancton['y'][1].append(y)
+
+            if value == "Indefinido":
+                indefinido['x'].append(x)
+                indefinido['y'].append(y)
+
+        
 
     fig.add_trace(
             go.Scatter(x=indefinido['x'], y=indefinido['y'], opacity=0.8,  mode='markers', marker=dict(
@@ -157,35 +170,62 @@ def add_reviewed_to_fig(fig, files_dict, mode):
                         color='Black',
                         width=2
                     ),
-                ), name=reviewed_label_map['Indefinido']),
+                ), name="Prediction mismatch with Expert: Undetermined"),
                 secondary_y=True,
             )
 
     fig.add_trace(
-            go.Scatter(x=detritos['x'], y=detritos['y'], opacity=0.8,  mode='markers', marker=dict(
-                    color=reviewed_color_map['Detritos'],
+            go.Scatter(x=detritos['x'][1], y=detritos['y'][1], opacity=0.8,  mode='markers', marker=dict(
+                    color=reviewed_color_map['Detritos_Mismatch'],
                     size=8,
                     colorscale='Hot',
                     line=dict(
                         color='Black',
                         width=2
                     ),
-                ), name=reviewed_label_map['Detritos']),
+                ), name="Prediction mismatch with Expert: Non Plankton, Prediction: Plankton"),
                 secondary_y=True,
             )
 
     fig.add_trace(
-            go.Scatter(x=plancton['x'], y=plancton['y'], opacity=0.8,  mode='markers', marker=dict(
-                    color=reviewed_color_map['Plancton'],
+            go.Scatter(x=plancton['x'][1], y=plancton['y'][1], opacity=0.8,  mode='markers', marker=dict(
+                    color=reviewed_color_map['Plancton_Mismatch'],
                     size=8,
                     colorscale='Hot',
                     line=dict(
                         color='Black',
                         width=2
                     ),
-                ), name=reviewed_label_map['Plancton']),
+                ), name="Prediction mismatch with Expert: Plankton, Prediction: Non Plankton"),
                 secondary_y=True,
             )
+    
+    fig.add_trace(
+            go.Scatter(x=detritos['x'][0], y=detritos['y'][0], opacity=0.8,  mode='markers', marker=dict(
+                    color=reviewed_color_map['Detritos_Match'],
+                    size=8,
+                    colorscale='Hot',
+                    line=dict(
+                        color='Black',
+                        width=2
+                    ),
+                ), name="Prediction match with Expert: Non Plankton, Prediction: Non Plankton"),
+                secondary_y=True,
+            )
+
+    fig.add_trace(
+            go.Scatter(x=plancton['x'][0], y=plancton['y'][0], opacity=0.8,  mode='markers', marker=dict(
+                    color=reviewed_color_map['Plancton_Match'],
+                    size=8,
+                    colorscale='Hot',
+                    line=dict(
+                        color='Black',
+                        width=2
+                    ),
+                ), name="Prediction match with Expert: Plankton, Prediction: Plankton"),
+                secondary_y=True,
+            )
+
 
 def get_points(df, model, num):
     points = []
@@ -314,16 +354,7 @@ def tsnemap_densenet(mode):
 
     files_dict = get_or_load_files_dict()
 
-    color_prediction=[]
-    dx_prediction = []
-    dy_prediction = []
-
-    for i, label in enumerate(df['Ground Truth']):
-        if df['DenseNet_Model_Pred'][i+1] == 'N':
-            color_prediction.append(label)
-            dx_prediction.append(df['densenet_x'][i + 1])
-            dy_prediction.append(df['densenet_y'][i + 1])
-
+    for i, _ in enumerate(df['Ground Truth']):
         coord_tuple = (df['densenet_x'][i + 1], df['densenet_y'][i + 1])
         if coord_tuple not in image_coord_dict:
             image_coord_dict[coord_tuple] = (get_file_name(df['File'][i + 1]), df['Ground Truth'][i + 1])
@@ -337,38 +368,107 @@ def tsnemap_densenet(mode):
 
     fig = make_subplots(specs=[[{"secondary_y": True}]])
 
+    plankton_filtered_array = [
+        item for item in files_dict.values() 
+        if item.dataset == DATASET_NAME[int(mode)] and item.ground_truth_label == "Plankton"
+    ]
+
+    detritus_filtered_array = [
+        item for item in files_dict.values() 
+        if item.dataset == DATASET_NAME[int(mode)] and item.ground_truth_label == "Non Plankton"
+    ]
+
     fig.add_trace(
-    go.Scatter(x=df['densenet_x'].to_numpy(), y=df['densenet_y'].to_numpy(), opacity=0.1, mode='markers', marker=dict(
-            color=[color_discrete_map[x] for x in color],
+    go.Scatter(x=[obj.densenet_position[0] for obj in plankton_filtered_array], y=[obj.densenet_position[1] for obj in plankton_filtered_array], opacity=0.1, mode='markers', marker=dict(
+            color=[color_discrete_map[x] for x in [obj.ground_truth_label for obj in plankton_filtered_array]],
             size=6,
             colorscale='Hot',
-        ), name="Ground Truth labels"),
+        ), name="Ground Truth labels Plankton"),
         secondary_y=False,
     )
 
     fig.add_trace(
-    go.Scatter(x=dx_prediction, y=dy_prediction, opacity=0.5, mode='markers', marker=dict(
-            color=[color_discrete_map[x] for x in color_prediction],
+    go.Scatter(x=[obj.densenet_position[0] for obj in detritus_filtered_array], y=[obj.densenet_position[1] for obj in detritus_filtered_array], opacity=0.1, mode='markers', marker=dict(
+            color=[color_discrete_map[x] for x in [obj.ground_truth_label for obj in detritus_filtered_array]],
+            size=6,
+            colorscale='Hot',
+        ), name="Ground Truth labels Non Plankton"),
+        secondary_y=False,
+    )
+
+    detritus_filtered_array = [
+        item for item in files_dict.values() 
+        if item.dataset == DATASET_NAME[int(mode)] and item.ground_truth_label == "Non Plankton"
+        and item.prediction_label != item.ground_truth_label
+    ]
+
+    plankton_filtered_array = [
+        item for item in files_dict.values() 
+        if item.dataset == DATASET_NAME[int(mode)] and item.ground_truth_label == "Plankton"
+        and item.prediction_label != item.ground_truth_label
+    ]
+
+    fig.add_trace(
+    go.Scatter(x=[obj.densenet_position[0] for obj in detritus_filtered_array], y=[obj.densenet_position[1] for obj in detritus_filtered_array], opacity=0.5, mode='markers', marker=dict(
+            color=[color_discrete_map[x] for x in [obj.ground_truth_label for obj in detritus_filtered_array]],
             size=6,
             colorscale='Hot',
             line=dict(
                 color='Black',
                 width=1,
             )
-        ), name="Ground Truth labels of Points that failed in prediction"),
+        ), name="GT Label: Non Plankton, Prediction: Plakton DenseNet Mismatch"),
         secondary_y=True,
     )
 
     fig.add_trace(
-    go.Scatter(x=df4_1[mx], y=df4_1[my], opacity=1.0,  mode='markers', marker=dict(
-            color=df4_1['color'],
+    go.Scatter(x=[obj.densenet_position[0] for obj in plankton_filtered_array], y=[obj.densenet_position[1] for obj in plankton_filtered_array], opacity=0.5, mode='markers', marker=dict(
+            color=[color_discrete_map[x] for x in [obj.ground_truth_label for obj in plankton_filtered_array]],
+            size=6,
+            colorscale='Hot',
+            line=dict(
+                color='Black',
+                width=1,
+            )
+        ), name="GT Label: Plankton, Prediction: Non Plankton DenseNet Mismatch"),
+        secondary_y=True,
+    )
+
+    detritus_filtered_array = [
+        item for item in files_dict.values() 
+        if item.dataset == DATASET_NAME[int(mode)] and item.ground_truth_label == "Non Plankton"
+        and item.number_of_models_failed == 4
+    ]
+
+    plankton_filtered_array = [
+        item for item in files_dict.values() 
+        if item.dataset == DATASET_NAME[int(mode)] and item.ground_truth_label == "Plankton"
+        and item.number_of_models_failed == 4
+    ]
+
+    fig.add_trace(
+    go.Scatter(x=[obj.densenet_position[0] for obj in plankton_filtered_array], y=[obj.densenet_position[1] for obj in plankton_filtered_array], opacity=1.0, mode='markers', marker=dict(
+            color=[color_discrete_map[x] for x in [obj.ground_truth_label for obj in plankton_filtered_array]],
             size=10,
             colorscale='Hot',
             line=dict(
                 color='Black',
                 width=1,
             )
-        ), name="GT of points that failed classification in the 4 models"),
+        ), name="GT Label: Plankton, Prediction: Non Plankton 4 Models Mismatch"),
+        secondary_y=True,
+    )
+    
+    fig.add_trace(
+    go.Scatter(x=[obj.densenet_position[0] for obj in detritus_filtered_array], y=[obj.densenet_position[1] for obj in detritus_filtered_array], opacity=1.0, mode='markers', marker=dict(
+            color=[color_discrete_map[x] for x in [obj.ground_truth_label for obj in detritus_filtered_array]],
+            size=10,
+            colorscale='Hot',
+            line=dict(
+                color='Black',
+                width=1,
+            )
+        ), name="GT Label: Non Plankton, Prediction: Plankton 4 Models Mismatch"),
         secondary_y=True,
     )
 

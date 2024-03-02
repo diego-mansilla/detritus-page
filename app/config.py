@@ -5,7 +5,11 @@ mode_map = {
 }
 
 reviewed_color_map={
-    "Indefinido": '#FFBF00',
+    "Indefinido": '#565951',
+    "Detritos_Mismatch": '#565951',
+    "Plancton_Mismatch": '#565951',
+    "Detritos_Match": '#9dfc03',
+    "Plancton_Match": '#9dfc03',
     "Detritos": '#5a3880',
     "Plancton": '#6ffffb',
 }
@@ -20,6 +24,9 @@ formal_name_map={
     "Other": 'Plankton',
     "Detritus": 'Non Plankton',
     "": "",
+    "Indefinido": "Undetermined",
+    "Detritos": "Non Plankton",
+    "Plancton": "Plankton",
 }
 
 prediction_color_discrete_map={
@@ -47,8 +54,10 @@ color_discrete_map={
     "Detritus0": '#ff0000',
 
     "Detritus": '#ff0000',
+    "Non Plankton": '#ff0000',
 
     "Other": '#1629d8',
+    "Plankton": '#1629d8',
 
     "Other4": '#1629d8',
     "Other3": '#1629d8',
