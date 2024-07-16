@@ -41,13 +41,21 @@ def home(model, mode):
     images = [data_source + img for img in images_input]
     return render_template('home.html', images=images, labels=labels, real_labels=real_class_labels, model=model)
 
-@app.route('/<path:clase>')
+@app.route('/<path:clase>/incorrect')
 def wrongImages(clase):
     data_map = load_dict_from_file('incorrect_files_output.txt')
     list_images = []
     if clase in data_map:
         list_images = data_map[clase]
-    return render_template('wrong_images.html', images=list_images)
+    return render_template('wrong_images.html', images=list_images, clase=clase)
+
+@app.route('/<path:clase>/correct')
+def correctImages(clase):
+    data_map = load_dict_from_file('correct_files_output.txt')
+    list_images = []
+    if clase in data_map:
+        list_images = data_map[clase]
+    return render_template('correct_images.html', images=list_images, clase=clase)
 
 @app.route('/review/<path:model>/<path:mode>')
 def review(model, mode):

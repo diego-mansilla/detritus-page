@@ -36,7 +36,7 @@ def get_individual_values_set(data_map):
     return set(chain.from_iterable(data_map.values()))
 
 DEST_DIR = 'app/static/images'
-data_map = load_dict_from_file('incorrect_files_output.txt')
+data_map = load_dict_from_file('correct_files_output.txt')
 
 images = []
 for subdir, dirs, files in os.walk(dir):
