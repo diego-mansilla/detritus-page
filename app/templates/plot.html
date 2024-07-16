@@ -118,6 +118,7 @@
                             <img src="${data.imagePath}" alt="Image" style="max-width: 100%; height: auto;">
                             <div class="image-label">Name of file: ${data.name}</div>
                             <div class="image-label">Ground Truth: ${data.label}</div>
+                            <div class="image-label">Original Ground Truth: ${data.real_label}</div>
                             <div class="image-label">DenseNet Prediction: ${data.prediction}</div>
                             <div class="image-label">Expert: ${data.expert_label}</div>
                             <div class="image-label">Number of models that failed prediction: ${data.failed_models}</div>
@@ -127,9 +128,12 @@
                         if (data.knnImagePaths && data.knnImagePaths.length > 0) {
                             content += `<div class="image-label">5 Nearest Neighbors:</div>`; // Label for kNN images
                             
-                            // Add kNN images
+                            // Add kNN images with labels
                             data.knnImagePaths.forEach((path, index) => {
-                                content += `<img src="${path}" alt="kNN Image ${index + 1}" style="max-width: 100%; height: auto; margin: 5px;">`;
+                                content += `<div style="display: inline-block; text-align: center; margin: 5px;">
+                                                <img src="${path}" alt="kNN Image ${index + 1}" style="max-width: 100%; height: auto;">
+                                                <div class="image-label">${data.knnImageLabel[index]}</div>
+                                            </div>`;
                             });
                         }
     
@@ -140,6 +144,7 @@
                             <div class="image-label">${data.message}</div>
                             <div class="image-label">Name of file: ${data.name}</div>
                             <div class="image-label">Ground Truth: ${data.label}</div>
+                            <div class="image-label">Original Ground Truth: ${data.real_label}</div>
                             <div class="image-label">DenseNet Prediction: ${data.prediction}</div>
                             <div class="image-label">Number of models that failed prediction: ${data.failed_models}</div>
                         `;

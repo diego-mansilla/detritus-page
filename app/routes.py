@@ -20,6 +20,7 @@ def load_file_name_class_map(file_path):
 DEST_DIR = 'static/images'
 IMG_SIZE = (160, 160)
 DATASET_NAME = ["TESTING", "VALIDATION", "TRAINING"]
+file_map = load_file_name_class_map("file_name_class_map.txt")
 
 @app.route('/')
 def main():
@@ -27,8 +28,6 @@ def main():
 
 @app.route('/<path:model>/<path:mode>')
 def home(model, mode):
-    file_map = load_file_name_class_map("file_name_class_map.txt")
-    print(file_map)
     data_source = 'images/'
     if mode == "1":
         data_source = 'images_resized/'
@@ -527,6 +526,10 @@ def get_image():
         '/static/images_resized/' + knn_image_name for knn_image_name in densenet_file_prediction.kNNList
     ]
 
+    knn_image_label = [
+        file_map[knn_image_name] for knn_image_name in densenet_file_prediction.kNNList
+    ]
+
     print(densenet_file_prediction.to_dict())
 
     # Check if the file exists
@@ -534,9 +537,11 @@ def get_image():
         return jsonify({
             "imagePath": '/' + image_path, 
             "label": densenet_file_prediction.ground_truth_label,
+            "real_label": file_map[image_name],
             "prediction": densenet_file_prediction.prediction_label,
             "expert_label": densenet_file_prediction.expert_prediction,
             "knnImagePaths": knn_image_paths,
+            "knnImageLabel": knn_image_label,
             "failed_models": densenet_file_prediction.number_of_models_failed,
             "name": image_name,
             "exists": True,
@@ -546,6 +551,7 @@ def get_image():
             "message": "Image not available", 
             "name": image_name,
             "label": densenet_file_prediction.ground_truth_label,
+            "real_label": file_map[image_name],
             "prediction": densenet_file_prediction.prediction_label,
             "expert_label": densenet_file_prediction.expert_prediction,
             "failed_models": densenet_file_prediction.number_of_models_failed,
