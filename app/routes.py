@@ -11,6 +11,11 @@ from app import app
 from app.config import reviewed_label_map, reviewed_color_map, mode_map, formal_name_map, inverse, color_discrete_map, reviewed_images_dict
 from app.utils import get_file_name, read_file
 from app.data import get_or_load_files_dict
+import pickle
+
+def load_file_name_class_map(file_path):
+    with open(file_path, 'rb') as file:
+        return pickle.load(file)
 
 DEST_DIR = 'static/images'
 IMG_SIZE = (160, 160)
@@ -22,12 +27,15 @@ def main():
 
 @app.route('/<path:model>/<path:mode>')
 def home(model, mode):
+    file_map = load_file_name_class_map("file_name_class_map.txt")
+    print(file_map)
     data_source = 'images/'
     if mode == "1":
         data_source = 'images_resized/'
     images_input , labels = read_file(model + '.txt')
+    real_class_labels = [file_map[img] for img in images_input]
     images = [data_source + img for img in images_input]
-    return render_template('home.html', images=images, labels=labels, model=model)
+    return render_template('home.html', images=images, labels=labels, real_labels=real_class_labels, model=model)
 
 @app.route('/review/<path:model>/<path:mode>')
 def review(model, mode):

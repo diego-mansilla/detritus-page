@@ -139,6 +139,7 @@
             <div class="image-cell">
                 <img src="{{ url_for('static', filename=image) }}" alt="Image">
                 <div class="image-label">GT:{{ labels[loop.index - 1] }}</div>
+                <div class="image-label">Real Label:{{ real_labels[loop.index - 1] }}</div>
             </div>
         {% endfor %}
     </div>
