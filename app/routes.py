@@ -12,12 +12,17 @@ from app.config import reviewed_label_map, reviewed_color_map, mode_map, formal_
 from app.utils import get_file_name, read_file
 from app.data import get_or_load_files_dict
 import pickle
+import ast
+
+def load_dict_from_file(file_path):
+    with open(file_path, 'r') as file:
+        data = file.read()
+    return ast.literal_eval(data)
 
 def load_file_name_class_map(file_path):
     with open(file_path, 'rb') as file:
         return pickle.load(file)
 
-DEST_DIR = 'static/images'
 IMG_SIZE = (160, 160)
 DATASET_NAME = ["TESTING", "VALIDATION", "TRAINING"]
 file_map = load_file_name_class_map("file_name_class_map.txt")
@@ -35,6 +40,14 @@ def home(model, mode):
     real_class_labels = [file_map[img] for img in images_input]
     images = [data_source + img for img in images_input]
     return render_template('home.html', images=images, labels=labels, real_labels=real_class_labels, model=model)
+
+@app.route('/<path:clase>')
+def wrongImages(clase):
+    data_map = load_dict_from_file('incorrect_files_output.txt')
+    list_images = []
+    if clase in data_map:
+        list_images = data_map[clase]
+    return render_template('wrong_images.html', images=list_images)
 
 @app.route('/review/<path:model>/<path:mode>')
 def review(model, mode):

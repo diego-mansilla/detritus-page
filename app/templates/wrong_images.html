@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Wrong Images</title>
+    <style>
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+        }
+        .image-cell {
+            text-align: center;
+            border: 1px solid #ddd;
+            padding: 10px;
+        }
+        .image-cell img {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Wrong Images for {{ clase }}</h1>
+    <div class="image-grid">
+        {% for image in images %}
+            <div class="image-cell">
+                <img src="{{ url_for('static', filename='images/' + image) }}" alt="{{ image }}">
+                <div>{{ image }}</div>
+            </div>
+        {% endfor %}
+    </div>
+</body>
+</html>
