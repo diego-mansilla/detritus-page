@@ -138,8 +138,8 @@ def tsnemap(mode):
         fig.update_layout(
             xaxis=dict(scaleanchor="y", scaleratio=1),
             yaxis=dict(scaleanchor="x", scaleratio=1),
-            width=2000,  # Set width larger
-            height=2000  # Set height larger
+            width=1500,  # Set width larger
+            height=1500  # Set height larger
         )
 
         div = plotly.offline.plot(fig, output_type='div')
