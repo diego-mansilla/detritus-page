@@ -115,34 +115,38 @@ def update_labels():
 @app.route('/plot/<path:mode>')
 def tsnemap(mode):
     df = pd.read_excel('detritus2.xlsx', sheet_name=int(mode))
-    new_header = df.iloc[0] #grab the first row for the header
-    df = df[1:] #take the data less the header row
-    df.columns = new_header #set the header row as the df header
-    df = df.iloc[: , 3:]
+    new_header = df.iloc[0]  # grab the first row for the header
+    df = df[1:]  # take the data less the header row
+    df.columns = new_header  # set the header row as the df header
+    df = df.iloc[:, 3:]
     df['Ground Truth'] = df['Real_class_name']
-    color=[df['Ground Truth'][i + 1] for i in range(len(df['Ground Truth']))]
+    color = [df['Ground Truth'][i + 1] for i in range(len(df['Ground Truth']))]
 
     graphs = []
     models = ['Densenet', 'InceptionResnet', 'MobileNet', 'Simple']
 
-    fig = px.scatter(x=df['densenet_x'], y=df['densenet_y'], color=color,  color_discrete_map=color_discrete_map, template='plotly_white')
-    div = plotly.offline.plot(fig, output_type='div')
-    graphs.append(div)
+    # For each model, generate the plot and adjust the layout
+    for model_x, model_y in [('densenet_x', 'densenet_y'),
+                             ('inception_resnet_x', 'inception_resnet_y'),
+                             ('mobilenet_x', 'mobilenet_y'),
+                             ('simple_model_x', 'simple_model_y')]:
 
-    fig = px.scatter(x=df['inception_resnet_x'], y=df['inception_resnet_y'], color=color,  color_discrete_map=color_discrete_map, template='plotly_white')
-    div = plotly.offline.plot(fig, output_type='div')
-    graphs.append(div)
+        fig = px.scatter(x=df[model_x], y=df[model_y], color=color,
+                         color_discrete_map=color_discrete_map, template='plotly_white')
 
-    fig = px.scatter(x=df['mobilenet_x'], y=df['mobilenet_y'], color=color,  color_discrete_map=color_discrete_map, template='plotly_white')
-    div = plotly.offline.plot(fig, output_type='div')
-    graphs.append(div)
+        # Update layout for equal aspect ratio and larger size
+        fig.update_layout(
+            xaxis=dict(scaleanchor="y", scaleratio=1),
+            yaxis=dict(scaleanchor="x", scaleratio=1),
+            width=800,  # Set width larger
+            height=800  # Set height larger
+        )
 
-    fig = px.scatter(x=df['simple_model_x'], y=df['simple_model_y'], color=color,  color_discrete_map=color_discrete_map, template='plotly_white')
-    div = plotly.offline.plot(fig, output_type='div')
-    graphs.append(div)
-    
+        div = plotly.offline.plot(fig, output_type='div')
+        graphs.append(div)
 
     return render_template('plot.html', graphs=graphs, models=models, mode=mode_map[int(mode)])
+
 
 def add_reviewed_to_fig(fig, files_dict, mode):
     indefinido = {}
@@ -519,7 +523,7 @@ def tsnemap_densenet(mode):
     fig.update_layout(
         autosize=True,
         width=None,  # Width will be automatically adjusted
-        height=2000,  # Height will be automatically adjusted
+        height=800,  # Height will be automatically adjusted
         margin=dict(l=20, r=20, t=20, b=20),  # Adjust margins to your needs
     )
 
