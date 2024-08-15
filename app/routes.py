@@ -517,10 +517,9 @@ def tsnemap_densenet(mode):
 
     # Set the layout to be responsive in width and adjust the height accordingly
     fig.update_layout(
-        xaxis=dict(scaleanchor="y", scaleratio=1),
-        yaxis=dict(scaleanchor="x", scaleratio=1),
-        width=2000,  # increase the width
-        height=2000  # increase the height
+        autosize=True,
+        width=None,  # Width will be automatically adjusted
+        height=2000,  # Height will be automatically adjusted
         margin=dict(l=20, r=20, t=20, b=20),  # Adjust margins to your needs
     )
 
